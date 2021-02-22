@@ -77,6 +77,8 @@ public class RewriteTemplateGeneratorTest {
             System.setOut(oldOut);
         }
 
-        assertThat(exitCode).isEqualTo(0);
+        if(exitCode != 0) {
+            fail("Failed. Output on the console was: " + out.toString());
+        }
     }
 }

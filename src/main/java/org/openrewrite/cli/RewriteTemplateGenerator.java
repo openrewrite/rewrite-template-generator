@@ -16,28 +16,24 @@
 package org.openrewrite.cli;
 
 import org.objectweb.asm.ClassReader;
-import org.openrewrite.Parser;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.maven.MavenParser;
 import org.openrewrite.maven.cache.LocalMavenArtifactCache;
 import org.openrewrite.maven.cache.MavenArtifactCache;
 import org.openrewrite.maven.cache.ReadOnlyLocalMavenArtifactCache;
 import org.openrewrite.maven.tree.Maven;
-import org.openrewrite.maven.tree.MavenRepository;
 import org.openrewrite.maven.tree.Pom;
-import org.openrewrite.maven.tree.Scope;
 import org.openrewrite.maven.utilities.MavenArtifactDownloader;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -111,19 +107,19 @@ public class RewriteTemplateGenerator {
 
             Maven maven = MavenParser.builder()
                     .resolveOptional(false)
-                    .doOnParse(new Parser.Listener() {
-                        @Override
-                        public void onParseFailed(Path sourcePath) {
-                            System.out.println("failed?");
-                        }
-                    })
                     .build()
                     .parse("<project>" +
                             "<modelVersion>4.0.0</modelVersion>" +
                             "<groupId>org.openrewrite</groupId>" +
                             "<artifactId>rewrite-template-generator</artifactId>" +
                             "<version>1</version>" +
-                            "<dependencies><dependency><groupId>" + gav[0] + "</groupId><artifactId>" + gav[1] + "</artifactId><version>" + gav[2] + "</version></dependency></dependencies>" +
+                            "<dependencies>" + "" +
+                            "  <dependency>" +
+                            "    <groupId>" + gav[0] + "</groupId>" +
+                            "    <artifactId>" + gav[1] + "</artifactId>" +
+                            "    <version>" + gav[2] + "</version>" +
+                            "  </dependency>" +
+                            "</dependencies>" +
                             "</project>")
                     .get(0);
 
@@ -132,8 +128,14 @@ public class RewriteTemplateGenerator {
                         throw new IllegalStateException("Unable to download artifact.", t);
                     });
 
-            Path artifact = mavenArtifactDownloader.downloadArtifact(maven.getModel().getDependencies().iterator().next());
-            if(artifact == null) {
+            Collection<Pom.Dependency> dependencies = maven.getModel().getDependencies();
+            if (dependencies.isEmpty()) {
+                System.out.println("Unable to resolve the dependency");
+                return CommandLine.ExitCode.USAGE;
+            }
+
+            Path artifact = mavenArtifactDownloader.downloadArtifact(dependencies.iterator().next());
+            if (artifact == null) {
                 System.out.println("Unable to download artifact");
                 return CommandLine.ExitCode.USAGE;
             }
