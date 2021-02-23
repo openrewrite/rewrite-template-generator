@@ -25,8 +25,32 @@ public class RewriteTemplateGeneratorTest {
     }
 
     @Test
+    void junitJupiter() {
+        printStubFor("org.junit.jupiter:junit-jupiter-api:5.7.1",
+                "org.junit.jupiter.api.Assertions");
+    }
+
+    @Test
     void guava() {
         assertDependsOnGenerated("com.google.guava:guava:29.0-jre");
+    }
+
+    @SuppressWarnings({"InstantiationOfUtilityClass", "CatchMayIgnoreException"})
+    private void printStubFor(String gav, String type) {
+        int exitCode = -1;
+
+        try {
+            CommandLine cmd = new CommandLine(new RewriteTemplateGenerator());
+
+            exitCode = cmd.execute(
+                    "depends-on",
+                    "--types=" + type,
+                    "--dependency=" + gav);
+        } catch (Throwable t) {
+            fail("Threw exception", t);
+        }
+
+        assertThat(exitCode).isEqualTo(0);
     }
 
     @SuppressWarnings({"InstantiationOfUtilityClass", "CatchMayIgnoreException"})

@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.zip.ZipEntry;
@@ -60,6 +61,12 @@ public class RewriteTemplateGenerator {
                 description = "group:artifact:version coordinates of a dependency in a Maven repository.",
                 required = true)
         private String dependency;
+
+        @Option(names = "--types",
+                description = "The types to generate stubs for",
+                split = ",")
+        @Nullable
+        private String[] types;
 
         @Option(names = "--maven-repository",
                 description = "URL of a Maven repository to fetch dependency from.",
@@ -145,8 +152,12 @@ public class RewriteTemplateGenerator {
                  ZipInputStream zis = new ZipInputStream(fis)) {
                 ZipEntry zipEntry;
                 while ((zipEntry = zis.getNextEntry()) != null) {
-                    if (!zipEntry.isDirectory() && zipEntry.getName().endsWith(".class")) {
-                        new ClassReader(zis).accept(publicApiPrinter, ClassReader.SKIP_DEBUG);
+                    String name = zipEntry.getName();
+                    if (!zipEntry.isDirectory() && name.endsWith(".class")) {
+                        String fqn = name.replace('/', '.').replaceFirst("\\.class$", "");
+                        if(Arrays.stream(types).anyMatch(fqn::equals)) {
+                            new ClassReader(zis).accept(publicApiPrinter, ClassReader.SKIP_DEBUG);
+                        }
                     }
                 }
                 publicApiPrinter.print();

@@ -90,7 +90,6 @@ public class PublicApiPrinter extends ClassVisitor {
 
         if (depth == 0) {
             stringBuilder.append("package ").append(packageName).append(";\n");
-            stringBuilder.append("import java.util.*;\n");
             stringBuilder.append("import java.io.*;\n\n");
         }
 
@@ -201,7 +200,7 @@ public class PublicApiPrinter extends ClassVisitor {
             type = Type.getType(descriptor).getClassName();
         }
 
-        type = type.replaceAll("java\\.(lang|util|io)\\.", "");
+        type = type.replaceAll("java\\.(lang|io)\\.", "");
         if (type.contains(".") && type.substring(0, type.lastIndexOf('.')).equals(packageName)) {
             type = type.substring(type.lastIndexOf('.') + 1);
         }
