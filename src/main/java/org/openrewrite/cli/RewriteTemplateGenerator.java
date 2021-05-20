@@ -101,7 +101,7 @@ public class RewriteTemplateGenerator {
 
         @Override
         public Integer call() {
-            MavenArtifactCache mavenArtifactCache = ReadOnlyLocalMavenArtifactCache.MAVEN_LOCAL.orElse(
+            MavenArtifactCache mavenArtifactCache = ReadOnlyLocalMavenArtifactCache.mavenLocal().orElse(
                     new LocalMavenArtifactCache(cacheDir == null ?
                             Paths.get(System.getProperty("user.home"), ".rewrite-cache", "artifacts") :
                             Paths.get(cacheDir)));
@@ -113,7 +113,6 @@ public class RewriteTemplateGenerator {
             }
 
             Maven maven = MavenParser.builder()
-                    .resolveOptional(false)
                     .build()
                     .parse("<project>" +
                             "<modelVersion>4.0.0</modelVersion>" +
