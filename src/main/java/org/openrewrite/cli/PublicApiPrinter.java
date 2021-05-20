@@ -5,10 +5,7 @@ import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.util.TraceSignatureVisitor;
 import org.openrewrite.internal.lang.Nullable;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
@@ -23,6 +20,8 @@ public class PublicApiPrinter extends ClassVisitor {
 
     private int access;
     private boolean lastVisitedWasEnum = false;
+
+    private Set<String> printedMethodDescriptors;
 
     private final Map<String, PublicApi> publicApisByName = new TreeMap<>();
 
@@ -74,11 +73,12 @@ public class PublicApiPrinter extends ClassVisitor {
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        printedMethodDescriptors = new HashSet<>();
         lastVisitedWasEnum = false;
-        if ((access & Opcodes.ACC_PUBLIC) == 0) {
-            return;
-        }
-
+        // this is preventing abstract classes from being printed
+//        if ((access & Opcodes.ACC_PUBLIC) == 0) {
+//            return;
+//        }
         this.stringBuilder = new StringBuilder();
 
         PublicApi api = new PublicApi(name, stringBuilder);
@@ -114,7 +114,7 @@ public class PublicApiPrinter extends ClassVisitor {
                     .filter(i -> !i.equals("java/lang/annotation/Annotation"))
                     .collect(toList());
             if(!printableInterfaces.isEmpty()) {
-                stringBuilder.append(" implements ");
+                stringBuilder.append(((access & Opcodes.ACC_INTERFACE) != 0) ? " extends " : " implements ");
                 for (int i = 0; i < printableInterfaces.size(); ++i) {
                     appendType(Type.getObjectType(printableInterfaces.get(i)).getDescriptor());
                     if (i != printableInterfaces.size() - 1) {
@@ -208,9 +208,16 @@ public class PublicApiPrinter extends ClassVisitor {
 
         stringBuilder.append(type);
     }
-
+    private String extractNameAndArguments(String methodName, String descriptor) {
+        return methodName + descriptor.substring(0, descriptor.indexOf(")")+ 1) ;
+    }
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        String nameArgs = extractNameAndArguments(name, descriptor);
+        if (printedMethodDescriptors.contains(nameArgs)){
+            return null;
+        }
+        printedMethodDescriptors.add(nameArgs);
         if (isNotPublicOuterClass() || (access & Opcodes.ACC_PUBLIC) == 0) {
             return null;
         }
@@ -273,7 +280,7 @@ public class PublicApiPrinter extends ClassVisitor {
             }
         }
 
-        if ((this.access & Opcodes.ACC_INTERFACE) == 0) {
+        if (((access & Opcodes.ACC_ABSTRACT) == 0) && ((this.access & Opcodes.ACC_INTERFACE) == 0)) {
             stringBuilder.append(" {");
             if (methodType.getReturnType().getSort() != Type.VOID) {
                 stringBuilder.append(" return (");
@@ -285,7 +292,6 @@ public class PublicApiPrinter extends ClassVisitor {
         else {
             stringBuilder.append(";");
         }
-
         stringBuilder.append('\n');
 
         return null;
