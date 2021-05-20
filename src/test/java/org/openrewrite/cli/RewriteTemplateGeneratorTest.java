@@ -30,22 +30,12 @@ public class RewriteTemplateGeneratorTest {
     }
 
     @Test
-    @Disabled
     void junitJupiter() {
         assertThat(0).isEqualTo(0);
         printStubFor("org.junit.jupiter:junit-jupiter-api:5.7.1",
                 "org.junit.jupiter.api.Assertions");
     }
 
-    @Test
-    void assertjAssertionsTest() {
-        assertThat(0).isEqualTo(0);
-        printStubFor("org.assertj:assertj-core:3.19.0",
-                "org.assertj.core.api.AbstractPredicateLikeAssert"
-//                "org.assertj.core.api.Abstract2DArrayAssert",
-//                "org.assertj.core.api.AbstractIterableAssert"
-        );
-    }
     @Test
     void assertjAssertions() {
         assertThat(0).isEqualTo(0);
