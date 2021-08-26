@@ -1,6 +1,12 @@
+import nl.javadude.gradle.plugins.license.LicenseExtension
+import java.util.*
+
 plugins {
+    application
     `java-library`
     `maven-publish`
+
+    id("com.github.hierynomus.license") version "0.16.1"
 }
 
 group = "org.openrewrite.tools"
@@ -56,4 +62,16 @@ tasks.named<Test>("test") {
 
 tasks.named<JavaCompile>("compileJava") {
     options.compilerArgs.addAll(listOf("-Aproject=${project.group}:${project.name}"))
+}
+
+application {
+    mainClass.set("org.openrewrite.cli.RewriteTemplateGenerator")
+}
+
+configure<LicenseExtension> {
+    ext.set("year", Calendar.getInstance().get(Calendar.YEAR))
+    skipExistingHeaders = true
+    header = project.rootProject.file("gradle/licenseHeader.txt")
+    mapping(mapOf("kt" to "SLASHSTAR_STYLE", "java" to "SLASHSTAR_STYLE"))
+    strictCheck = true
 }
