@@ -200,7 +200,7 @@ public class PublicApiPrinter extends ClassVisitor {
             type = Type.getType(descriptor).getClassName();
         }
 
-        type = type.replaceAll("java\\.(lang|io)\\.", "");
+        type = type.replaceAll("java\\.(io)\\.", "");
         if (type.contains(".") && type.substring(0, type.lastIndexOf('.')).equals(packageName)) {
             type = type.substring(type.lastIndexOf('.') + 1);
         }
