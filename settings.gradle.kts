@@ -1,5 +1,9 @@
 rootProject.name = "rewrite-template-generator"
 
+plugins {
+    id("com.gradle.enterprise") version "3.7"
+}
+
 gradleEnterprise {
     server = "https://ge.openrewrite.org/"
 
