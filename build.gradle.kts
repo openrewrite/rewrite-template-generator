@@ -7,6 +7,12 @@ plugins {
     `maven-publish`
 
     id("com.github.hierynomus.license") version "0.16.1"
+    id("org.owasp.dependencycheck") version "6.5.3"
+}
+
+dependencyCheck {
+    analyzers.assemblyEnabled = false
+    failBuildOnCVSS = 9.0F
 }
 
 group = "org.openrewrite.tools"
