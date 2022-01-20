@@ -35,14 +35,14 @@ public class PublicApiPrinter extends ClassVisitor {
     private String packageName;
 
     private int access;
-    private boolean lastVisitedWasEnum = false;
+    private boolean lastVisitedWasEnum;
 
     private Set<String> printedMethodDescriptors;
 
     private final Map<String, PublicApi> publicApisByName = new TreeMap<>();
 
-    @SuppressWarnings("UseOfSystemOutOrSystemErr")
-    private class PublicApi {
+     @SuppressWarnings("UseOfSystemOutOrSystemErr")
+     private final class PublicApi {
         private final String name;
         private final StringBuilder contents;
 
@@ -128,7 +128,7 @@ public class PublicApiPrinter extends ClassVisitor {
         }
         if (interfaces != null && interfaces.length > 0) {
             List<String> printableInterfaces = Arrays.stream(interfaces)
-                    .filter(i -> !i.equals("java/lang/annotation/Annotation"))
+                    .filter(i -> !"java/lang/annotation/Annotation".equals(i))
                     .collect(toList());
             if(!printableInterfaces.isEmpty()) {
                 stringBuilder.append(((access & Opcodes.ACC_INTERFACE) != 0) ? " extends " : " implements ");
@@ -239,7 +239,7 @@ public class PublicApiPrinter extends ClassVisitor {
             return null;
         }
 
-        if((this.access & Opcodes.ACC_ENUM) != 0 && (name.equals("values") || name.equals("valueOf"))) {
+        if((this.access & Opcodes.ACC_ENUM) != 0 && ("values".equals(name) || "valueOf".equals(name))) {
             return null;
         }
 
@@ -268,7 +268,7 @@ public class PublicApiPrinter extends ClassVisitor {
         appendType(methodType.getReturnType().getDescriptor());
 
         stringBuilder.append(' ');
-        if (name.equals("<init>")) {
+        if ("<init>".equals(name)) {
             stringBuilder.append(className);
         } else {
             stringBuilder.append(name);
