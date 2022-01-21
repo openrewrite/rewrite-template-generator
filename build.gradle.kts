@@ -48,7 +48,7 @@ dependencies {
 
     implementation("org.slf4j:slf4j-nop:latest.release")
 
-    implementation("ch.qos.logback:logback-classic:1.0.13")
+    implementation("ch.qos.logback:logback-classic:1.2.10")
 
 //    // https://github.com/oracle/graal/issues/1943
 //    implementation("org.codehaus.janino:janino:3.1.0")
