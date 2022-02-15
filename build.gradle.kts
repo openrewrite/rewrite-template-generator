@@ -8,6 +8,7 @@ plugins {
 
     id("com.github.hierynomus.license") version "0.16.1"
     id("org.owasp.dependencycheck") version "6.5.3"
+    id("org.openrewrite.rewrite") version "5.16.2"
 }
 
 dependencyCheck {
@@ -20,6 +21,10 @@ group = "org.openrewrite.tools"
 repositories {
     mavenLocal()
     mavenCentral()
+}
+
+rewrite {
+    activeRecipe("org.openrewrite.java.UseStaticImport")
 }
 
 configurations.all {

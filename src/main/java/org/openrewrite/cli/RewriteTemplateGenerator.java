@@ -21,9 +21,11 @@ import org.openrewrite.maven.MavenParser;
 import org.openrewrite.maven.cache.LocalMavenArtifactCache;
 import org.openrewrite.maven.cache.MavenArtifactCache;
 import org.openrewrite.maven.cache.ReadOnlyLocalMavenArtifactCache;
-import org.openrewrite.maven.tree.Maven;
+import org.openrewrite.maven.tree.MavenResolutionResult;
 import org.openrewrite.maven.tree.Pom;
+import org.openrewrite.maven.tree.ResolvedDependency;
 import org.openrewrite.maven.utilities.MavenArtifactDownloader;
+import org.openrewrite.xml.tree.Xml;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -35,7 +37,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -112,7 +116,7 @@ public class RewriteTemplateGenerator {
                 return CommandLine.ExitCode.USAGE;
             }
 
-            Maven maven = MavenParser.builder()
+            Xml.Document pom = MavenParser.builder()
                     .build()
                     .parse("<project>" +
                             "<modelVersion>4.0.0</modelVersion>" +
@@ -134,7 +138,14 @@ public class RewriteTemplateGenerator {
                         throw new IllegalStateException("Unable to download artifact.", t);
                     });
 
-            Collection<Pom.Dependency> dependencies = maven.getModel().getDependencies();
+            //noinspection OptionalGetWithoutIsPresent
+            MavenResolutionResult maven = pom.getMarkers().findFirst(MavenResolutionResult.class).get();
+
+            List<ResolvedDependency> dependencies = maven.getDependencies().values()
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .distinct()
+                    .collect(Collectors.toList());
             if (dependencies.isEmpty()) {
                 System.out.println("Unable to resolve the dependency");
                 return CommandLine.ExitCode.USAGE;
