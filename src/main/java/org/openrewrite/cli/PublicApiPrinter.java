@@ -127,7 +127,7 @@ public class PublicApiPrinter extends ClassVisitor {
             appendType(Type.getObjectType(superName).getDescriptor());
         }
         if (interfaces != null && interfaces.length > 0) {
-            List<String> printableInterfaces = Arrays.stream(interfaces)
+            /*~~>*/List<String> printableInterfaces = Arrays.stream(interfaces)
                     .filter(i -> !"java/lang/annotation/Annotation".equals(i))
                     .collect(toList());
             if(!printableInterfaces.isEmpty()) {

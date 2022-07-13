@@ -140,7 +140,7 @@ public class RewriteTemplateGenerator {
             //noinspection OptionalGetWithoutIsPresent
             MavenResolutionResult maven = pom.getMarkers().findFirst(MavenResolutionResult.class).get();
 
-            List<ResolvedDependency> dependencies = maven.getDependencies().values()
+            /*~~>*/List<ResolvedDependency> dependencies = maven.getDependencies().values()
                     .stream()
                     .flatMap(Collection::stream)
                     .distinct()
